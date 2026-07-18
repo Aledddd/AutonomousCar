@@ -12,7 +12,7 @@
 class IMU {
 public:
     IMU();
-    void initialization(void);
+    void initialization();
 
 private:
     int fd = 0;
@@ -31,6 +31,8 @@ private:
 
     void configuration(int fd);
     int16_t convert_to_i16(int msb = 0, int lsb = 0);
+
+    void getAccelerationRawData();
+    void getGyroscopeRawData();
     void getReadableData();
-    void getRawData();
 };
