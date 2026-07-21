@@ -2,8 +2,6 @@
 
 void IMU::initialization(void)
 {
-    
-    std::cout << "Opening to I2C device " << device << std::endl;
     fd = open(device.c_str(),O_RDWR);
     if(fd < 0)
     {
@@ -25,7 +23,7 @@ void IMU::initialization(void)
 }
 
 
-void IMU::configuration(int fd)
+void IMU::configuration()
 {
     bool config = 0;
     // Configuration
@@ -102,7 +100,7 @@ void IMU::configuration(int fd)
 }
 
 
-void IMU::getAccelerationRawData()
+void IMU::getRawData()
 {
     uint8_t register = BNO055_ACC_DATA_X_LSB;
     if(write(fd, &reg, 1) != 1)
@@ -110,22 +108,7 @@ void IMU::getAccelerationRawData()
         close(fd);
         exit(-1);
     }
-    if(read(fd, bno055_data, 6) != 6)
-    {
-        close(fd);
-        exit(-1);
-    }
-}
-
-void IMU::getGyroscopeRawData()
-{
-    uint8_t register = BNO055_GYR_DATA_X_LSB;
-    if(write(fd, &reg, 1) != 1)
-    {
-        close(fd);
-        exit(-1);
-    }
-    if(read(fd, bno055_data+6, 6) != 6)
+    if(read(fd, bno055_data, 18) != 18)
     {
         close(fd);
         exit(-1);
@@ -145,7 +128,7 @@ void IMU::getReadableData()
     acc_data[1] = ((float)convert_to_i16(3,2))/100.0f;
     acc_data[2] = ((float)convert_to_i16(5,4))/100.0f;
 
-    gyr_data[0] = ((float)convert_to_i16(13,14))/16.0f;
-    gyr_data[1] = ((float)convert_to_i16(15,16))/16.0f;
-    gyr_data[2] = ((float)convert_to_i16(17,18))/16.0f;
+    gyr_data[0] = ((float)convert_to_i16(11,12))/16.0f;
+    gyr_data[1] = ((float)convert_to_i16(13,14))/16.0f;
+    gyr_data[2] = ((float)convert_to_i16(15,16))/16.0f;
 }

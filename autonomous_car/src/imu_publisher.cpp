@@ -10,21 +10,19 @@
 
 using namespace std::chrono_literals;
 
-class ImuPublisher : public rclcpp::Node
+class ImuPublisher : public rclcpp::Node, public IMU
 {
 public:
     ImuPublisher() : Node("imu_node"), imu()
     {
-        imu.initialization();
-        imu.configuration();
+        initialization();
 
         publisher_ = this->create_publisher<sensor_msgs::msg::Imu>("/imu", 100);
 
         auto imu_callback = 
             [this]() -> void {
-                imu.getAccelerationRawData();
-                imu.getGyroscopeRawData();
-                imu.getReadableData();
+                getRawData();
+                getReadableData();
 
                 sensor_msgs::msg::Imu::SharedPtr msg;
             };
@@ -34,8 +32,6 @@ public:
 private:
     rclcpp::TimerBase::SharedPtr timer_;
     rclcpp::Publisher<sensor_msgs::msg::Imu>::SharedPtr publisher_;
-
-    IMU imu;
 };
 
 int main(int argc, char** argv)
