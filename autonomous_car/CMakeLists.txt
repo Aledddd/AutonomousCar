@@ -27,15 +27,16 @@ find_package(image_transport REQUIRED)
 
 include_directories(include/autonomous_car/)
 
-add_executable(rpi_cam_node 
+add_executable(cam_pub
                 src/camera_publisher.cpp 
                 src/resources/camera.cpp)
 
-add_executable(rpi_cam_tf 
-                src/camera_transforms.cpp)
+add_executable(imu_pub
+                src/imu_publisher.cpp
+                src/resources/imu.cpp)
 
 
-target_link_libraries(rpi_cam_node PUBLIC
+target_link_libraries(cam_pub PUBLIC
   rclcpp::rclcpp
   ${sensor_msgs_TARGETS}
   ${OpenCV_LIBS}
@@ -43,18 +44,14 @@ target_link_libraries(rpi_cam_node PUBLIC
   image_transport::image_transport
 )
 
-target_link_libraries(rpi_cam_tf PUBLIC
+target_link_libraries(imu_pub PUBLIC
   rclcpp::rclcpp
   ${sensor_msgs_TARGETS}
-  ${geometry_msgs_TARGETS}
-  ${nav_msgs_TARGETS}
-  tf2::tf2
-  tf2_ros::tf2_ros
 )
 
 install(TARGETS 
-  rpi_cam_node
-  rpi_cam_tf
+  cam_pub
+  imu_pub
   DESTINATION lib/${PROJECT_NAME})
 
 ament_package()

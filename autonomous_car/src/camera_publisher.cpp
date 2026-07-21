@@ -16,7 +16,7 @@ using namespace std::chrono_literals;
 class CameraPublisher : public rclcpp::Node
 {
 public:
-    CameraPublisher() : Node("rpi_cam_node"), cam()
+    CameraPublisher() : Node("cam_node"), cam()
     {
         cam.setup(640, 480);
         publisher_ = this->create_publisher<sensor_msgs::msg::Image>("cam/image_raw", 10);

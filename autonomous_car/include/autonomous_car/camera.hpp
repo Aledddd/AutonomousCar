@@ -7,12 +7,12 @@
 
 class Camera
 {
-    public:
-            Camera(unsigned int index = 0, unsigned int apiID = cv::CAP_ANY);
-            void setup( unsigned int width, unsigned int height);
-            cv::Mat getFrame();
-            bool isOpened() const { return cap.isOpened(); };
+public:
+        Camera(unsigned int index = 0, unsigned int apiID = cv::CAP_ANY);
+        void setup( unsigned int width, unsigned int height);
+        cv::Mat getFrame();
+        bool isOpened() const { return cap.isOpened(); };
 
-    protected:
-            cv::VideoCapture cap;
+protected:
+        cv::VideoCapture cap;
 };
