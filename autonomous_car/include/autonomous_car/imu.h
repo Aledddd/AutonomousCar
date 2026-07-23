@@ -13,15 +13,14 @@ class IMU {
 public:
     void initialization();
     void configuration();
-
-    float* getData() { return data; };
-    float data[9];
+    void getRawData();
+    float data[10];
     
 private:
     int fd = 0;
     std::string device = "/dev/i2c-5";
     unsigned long mode = I2C_SLAVE;
-
+    
     const static int size = 38;
     uint8_t bno055_data[size]; 
     
@@ -32,7 +31,5 @@ private:
     }
     
     int16_t convert_to_i16(int msb = 0, int lsb = 0);
-    
-    void getRawData();
     void getReadableData();
 };

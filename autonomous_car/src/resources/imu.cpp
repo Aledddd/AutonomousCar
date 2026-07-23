@@ -104,14 +104,13 @@ void IMU::getRawData()
     uint8_t reg = BNO055_ACC_DATA_X_LSB;
     if(write(fd, &reg, 1) != 1)
     {
-        close(fd);
-        exit(-1);
+        std::cerr << "Failed to access register address" << std::endl;
     }
     if(read(fd, IMU::bno055_data, IMU::size) != IMU::size)
     {
-        close(fd);
-        exit(-1);
+        std::cerr << "Failed to obtain data" << std::endl;
     }
+    IMU::getReadableData();
 }
 
 int16_t IMU::convert_to_i16(int lsb, int msb)
@@ -128,11 +127,12 @@ void IMU::getReadableData()
     IMU::data[1] = ((float)convert_to_i16(14,13))/900.0f;
     IMU::data[2] = ((float)convert_to_i16(16,15))/900.0f;
     //Quaternion 
-    IMU::data[3] = ((float)convert_to_i16(27,26))/16384.0f; // unit less (2^14)
-    IMU::data[4] = ((float)convert_to_i16(29,28))/16384.0f;
-    IMU::data[5] = ((float)convert_to_i16(31,30))/16384.0f;
+    IMU::data[3] = ((float)convert_to_i16(25,24))/16384.0f; // unit less (2^14)
+    IMU::data[4] = ((float)convert_to_i16(27,26))/16384.0f;
+    IMU::data[5] = ((float)convert_to_i16(29,28))/16384.0f;
+    IMU::data[6] = ((float)convert_to_i16(31,30))/16384.0f;
     //Linear Acceleration 
-    IMU::data[6] = ((float)convert_to_i16(33,32))/100.0f; // m/s^2
-    IMU::data[7] = ((float)convert_to_i16(35,34))/100.0f;
-    IMU::data[8] = ((float)convert_to_i16(37,36))/100.0f;
+    IMU::data[7] = ((float)convert_to_i16(33,32))/100.0f; // m/s^2
+    IMU::data[8] = ((float)convert_to_i16(35,34))/100.0f;
+    IMU::data[9] = ((float)convert_to_i16(37,36))/100.0f;
 }

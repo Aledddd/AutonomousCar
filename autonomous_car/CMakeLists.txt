@@ -19,8 +19,6 @@ find_package(rclcpp REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(nav_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
-find_package(tf2 REQUIRED)
-find_package(tf2_ros REQUIRED)
 find_package(OpenCV REQUIRED)
 find_package(cv_bridge REQUIRED)
 find_package(image_transport REQUIRED)
@@ -38,7 +36,6 @@ add_executable(imu_pub
 
 target_link_libraries(cam_pub PUBLIC
   rclcpp::rclcpp
-  ${sensor_msgs_TARGETS}
   ${OpenCV_LIBS}
   cv_bridge::cv_bridge
   image_transport::image_transport
