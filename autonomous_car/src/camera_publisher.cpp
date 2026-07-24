@@ -3,10 +3,9 @@
 #include <memory>
 
 //ROS Headers
-#include <rclcpp/rclcpp.hpp>
-#include <sensor_msgs/msg/image.hpp>
-#include <cv_bridge/cv_bridge.hpp>
-
+#include "rclcpp/rclcpp.hpp"
+#include "cv_bridge/cv_bridge.hpp"
+#include "image_transport/image_transport.hpp"
 
 #include "camera.hpp"
 
@@ -16,18 +15,23 @@ using namespace std::chrono_literals;
 class CameraPublisher : public rclcpp::Node
 {
 public:
-    CameraPublisher() : Node("rpi_cam_node"), cam()
+    CameraPublisher() : Node("cam_node"), cam()
     {
         cam.setup(640, 480);
-        publisher_ = this->create_publisher<sensor_msgs::msg::Image>("cam/image_raw", 10);
+        publisher_ = image_transport::create_publisher(this, "camera/image_raw");
 
         auto timer_callback =
             [this]() -> void {
                 if(cam.isOpened())
                 {
-                    cv::Mat frame_pub = cam.getFrame();
-                    sensor_msgs::msg::Image::SharedPtr msg = cv_bridge::CvImage(std_msgs::msg::Header(), "bgr8", frame_pub).toImageMsg();
-                    this->publisher_->publish(*msg);
+                    cv::Mat frame = cam.getFrame();
+                    std_msgs::msg::Header header;
+                    header.stamp = this->get_clock()->now();
+                    header.frame_id = "camera_link";
+                    
+                    publisher_.publish(cv_bridge::CvImage(header, "bgr8", frame).toImageMsg());
+                    
+                    //publisher_->publish(*msg);
                 }
         };
 
@@ -35,7 +39,7 @@ public:
     }
 private:
     rclcpp::TimerBase::SharedPtr timer_;
-    rclcpp::Publisher<sensor_msgs::msg::Image>::SharedPtr publisher_;
+    image_transport::Publisher publisher_;
         
     Camera cam;      
 };

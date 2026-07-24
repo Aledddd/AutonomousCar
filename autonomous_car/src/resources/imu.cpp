@@ -2,8 +2,6 @@
 
 void IMU::initialization(void)
 {
-    
-    std::cout << "Opening to I2C device " << device << std::endl;
     fd = open(device.c_str(),O_RDWR);
     if(fd < 0)
     {
@@ -20,14 +18,13 @@ void IMU::initialization(void)
             return;
     }
     std::cout << "Set up to I2C Mode !" << std::endl << "Configurating device..." << std::endl;
-    configuration(fd);
+    IMU::configuration();
     if(fcntl(fd, F_GETFL) == -1 && errno == EBADF) {std::cout << "Configuration failed because the file was closed !" << std::endl;};
 }
 
 
-void IMU::configuration(int fd)
+void IMU::configuration()
 {
-    bool config = 0;
     // Configuration
     uint8_t opr_config[2] = {BNO055_OPR_MODE, to_u8(OPRMode::CONFIGMODE)};
 
@@ -102,50 +99,40 @@ void IMU::configuration(int fd)
 }
 
 
-void IMU::getAccelerationRawData()
+void IMU::getRawData()
 {
-    uint8_t register = BNO055_ACC_DATA_X_LSB;
+    uint8_t reg = BNO055_ACC_DATA_X_LSB;
     if(write(fd, &reg, 1) != 1)
     {
-        close(fd);
-        exit(-1);
+        std::cerr << "Failed to access register address" << std::endl;
     }
-    if(read(fd, bno055_data, 6) != 6)
+    if(read(fd, IMU::bno055_data, IMU::size) != IMU::size)
     {
-        close(fd);
-        exit(-1);
+        std::cerr << "Failed to obtain data" << std::endl;
     }
+    IMU::getReadableData();
 }
 
-void IMU::getGyroscopeRawData()
+int16_t IMU::convert_to_i16(int lsb, int msb)
 {
-    uint8_t register = BNO055_GYR_DATA_X_LSB;
-    if(write(fd, &reg, 1) != 1)
-    {
-        close(fd);
-        exit(-1);
-    }
-    if(read(fd, bno055_data+6, 6) != 6)
-    {
-        close(fd);
-        exit(-1);
-    }
-}
-
-int16_t IMU::convert_to_i16(int msb, int lsb)
-{
-    return (((int16_t)((uint8_t *)(bno055_data))[lsb] << 8) | 
-                      ((uint8_t *)(bno055_data))[msb]);
+    return (((int16_t)((uint8_t *)(IMU::bno055_data))[lsb] << 8) | 
+                      ((uint8_t *)(IMU::bno055_data))[msb]);
 }
 
 
 void IMU::getReadableData()
 {
-    acc_data[0] = ((float)convert_to_i16(1,0))/100.0f;
-    acc_data[1] = ((float)convert_to_i16(3,2))/100.0f;
-    acc_data[2] = ((float)convert_to_i16(5,4))/100.0f;
-
-    gyr_data[0] = ((float)convert_to_i16(13,14))/16.0f;
-    gyr_data[1] = ((float)convert_to_i16(15,16))/16.0f;
-    gyr_data[2] = ((float)convert_to_i16(17,18))/16.0f;
+    // Gyroscope 
+    IMU::data[0] = ((float)convert_to_i16(12,11))/900.0f; // Rps (Radian per second)
+    IMU::data[1] = ((float)convert_to_i16(14,13))/900.0f;
+    IMU::data[2] = ((float)convert_to_i16(16,15))/900.0f;
+    //Quaternion 
+    IMU::data[3] = ((float)convert_to_i16(25,24))/16384.0f; // unit less (2^14)
+    IMU::data[4] = ((float)convert_to_i16(27,26))/16384.0f;
+    IMU::data[5] = ((float)convert_to_i16(29,28))/16384.0f;
+    IMU::data[6] = ((float)convert_to_i16(31,30))/16384.0f;
+    //Linear Acceleration 
+    IMU::data[7] = ((float)convert_to_i16(33,32))/100.0f; // m/s^2
+    IMU::data[8] = ((float)convert_to_i16(35,34))/100.0f;
+    IMU::data[9] = ((float)convert_to_i16(37,36))/100.0f;
 }
